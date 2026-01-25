@@ -14,13 +14,13 @@ provider:
 
 functions:
   redirect:
-    handler: src/redirect.handler
+    handler: src/urls/handlers/redirect.handler
     events:
       - httpApi:
           path: /redirect
           method: get
   createUrl:
-    handler: src/createUrl.handler
+    handler: src/urls/handlers/createUrl.handler
     events:
       - httpApi:
           path: /createUrl
