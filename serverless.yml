@@ -17,7 +17,7 @@ functions:
     handler: src/urls/handlers/redirect.handler
     events:
       - httpApi:
-          path: /redirect
+          path: /{shortUrl}
           method: get
   createUrl:
     handler: src/urls/handlers/createUrl.handler

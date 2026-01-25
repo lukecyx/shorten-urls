@@ -9,5 +9,4 @@ import { redirectSchema } from "../schemas";
 export const handler = middy(redirect)
   .use(logMiddleware())
   .use(validateRequestPart(redirectSchema, "pathParameters"))
-  .use(httpJsonBodyParser())
   .use(httpErrorHandler());
