@@ -4,12 +4,12 @@ import middy from "@middy/core";
 
 function validateRequestPart(
   schema: ZodSchema,
-  part: string,
+  part: keyof APIGatewayProxyEventV2,
 ): middy.MiddlewareObj<APIGatewayProxyEventV2> {
   const before: middy.MiddlewareFn<APIGatewayProxyEventV2> = async (
     request,
   ) => {
-    const partToValidate = request.event[part as keyof APIGatewayProxyEventV2];
+    const partToValidate = request.event[part];
     const parsed = schema.safeParse(partToValidate);
 
     if (!parsed.success) {

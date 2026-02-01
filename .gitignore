@@ -1,2 +1,16 @@
 node_modules
-.serverless
+
+cdk.context.json
+cdk.out/
+
+dist/
+build/
+
+.DS_Store
+.idea
+.vscode
+
+.env
+.env.dev
+.env.stage
+.env.prod

@@ -1,9 +1,10 @@
+import { APIGatewayProxyEvent, APIGatewayProxyResultV2 } from "aws-lambda";
 import { LambdaLoggingContext } from "~/lib/middleware/types";
 
 export async function createUrl(
-  event: any,
+  event: APIGatewayProxyEvent,
   context: LambdaLoggingContext,
-): Promise<any> {
+): Promise<APIGatewayProxyResultV2> {
   context.logger.info("Hello from the createUrl controller!!");
   return {
     statusCode: 200,
@@ -12,9 +13,9 @@ export async function createUrl(
 }
 
 export async function redirect(
-  event: any,
+  event: APIGatewayProxyEvent,
   context: LambdaLoggingContext,
-): Promise<any> {
+): Promise<APIGatewayProxyResultV2> {
   console.log("redirect controlelr called");
   return {
     statusCode: 200,
