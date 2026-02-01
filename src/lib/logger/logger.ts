@@ -4,7 +4,7 @@ let logger: pino.Logger | undefined;
 
 export const getLogger = () => {
   if (!logger) {
-    return pino({
+    logger = pino({
       level: process.env.LOG_LEVEL || "info",
     });
   }
