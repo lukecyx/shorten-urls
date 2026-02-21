@@ -1,0 +1,7 @@
+{
+  "name": "snowflake",
+  "version": "1.0.0",
+  "description": "Snowflake ID generation utility",
+  "main": "index.js",
+  "type": "commonjs"
+}

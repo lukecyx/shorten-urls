@@ -14,6 +14,13 @@ const stage = app.node.tryGetContext("stage") ?? "dev";
 console.log("ACC_ID", process.env.CDK_DEFAULT_ACCOUNT);
 
 if (stage === "dev") {
+  const network = new NetworkStack(app, `NetworkStack-${stage}`, {
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: "eu-west-2",
+    },
+  });
+
   // const redisSecretStack = new RedisSecretStack(
   //   app,
   //   `RedisSecretStack-${stage}`,
@@ -26,14 +33,7 @@ if (stage === "dev") {
   //   },
   // );
 
-  const network = new NetworkStack(app, `NetworkStack-${stage}`, {
-    env: {
-      account: process.env.CDK_DEFAULT_ACCOUNT,
-      region: "eu-west-2",
-    },
-  });
-
-  const postgres = new DbStack(app, `DbStack-${stage}`, {
+  const redis = new CacheStack(app, `CacheStack-${stage}`, {
     stage,
     vpc: network.vpc,
     env: {
@@ -42,7 +42,7 @@ if (stage === "dev") {
     },
   });
 
-  const redis = new CacheStack(app, `CacheStack-${stage}`, {
+  const postgres = new DbStack(app, `DbStack-${stage}`, {
     stage,
     vpc: network.vpc,
     env: {

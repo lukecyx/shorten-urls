@@ -24,6 +24,7 @@ export class DbStack extends cdk.Stack {
         version: rds.PostgresEngineVersion.VER_15,
       }),
       vpc: props.vpc,
+      // Stores a random password in secrets manager.
       credentials: rds.Credentials.fromGeneratedSecret("postgres"),
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.BURSTABLE3,
