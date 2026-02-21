@@ -9,21 +9,32 @@ export const logMiddleware = (): MiddlewareObj<APIGatewayProxyEventV2> => ({
     const ctx = handler.context as LambdaLoggingContext;
     const logger = getLogger();
 
-    ctx.logger = logger.child({
-      requestId: handler.context.awsRequestId,
+    // Create the initial request context with child logger
+    // Winston child logger will include requestId in all subsequent logs
+    const requestId = handler.context.awsRequestId || "local";
+
+    const childLogger = logger.child({ requestId });
+
+    ctx.requestContext = {
+      logger: childLogger,
+      requestId,
+    };
+
+    ctx.requestContext.logger.info("Incoming request", {
+      event: handler.event,
     });
-    ctx.logger.info({ event: handler.event }, "Incoming request");
   },
   after: (handler) => {
     const ctx = handler.context as LambdaLoggingContext;
 
-    ctx.logger.info({ response: handler.response }, "Request succeeded");
+    ctx.requestContext.logger.info("Request succeeded", {
+      response: handler.response,
+    });
   },
   onError: (handler) => {
     const ctx = handler.context as LambdaLoggingContext;
-    ctx.logger.error({ error: handler.error }, "Request failed");
-
-    // rethrow so Lambda sees it as an error
-    throw handler.error;
+    ctx.requestContext.logger.error("Request failed", handler.error);
+    //
+    // Error will automatically propagate to next error handler (httpErrorHandler)
   },
 });

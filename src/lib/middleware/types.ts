@@ -1,6 +1,6 @@
 import { Context } from "aws-lambda";
-import pino from "pino";
+import { RequestContext } from "~/lib/types/context";
 
 export interface LambdaLoggingContext extends Context {
-  logger: pino.Logger;
+  requestContext: RequestContext;
 }

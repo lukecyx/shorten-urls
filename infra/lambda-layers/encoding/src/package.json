@@ -1,0 +1,7 @@
+{
+  "name": "encoding",
+  "version": "1.0.0",
+  "description": "Encoding utilities for Feistel and Base58",
+  "main": "index.js",
+  "type": "commonjs"
+}

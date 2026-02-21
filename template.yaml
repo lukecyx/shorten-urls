@@ -1,0 +1,143 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: SAM template for local development of URL shortener service
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    MemorySize: 256
+    Timeout: 30
+    Environment:
+      Variables:
+        NODE_OPTIONS: "--enable-source-maps"
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
+      MaxAge: "'600'"
+      AllowCredentials: false
+    Auth:
+      DefaultAuthorizer: NONE
+
+Resources:
+  # Lambda Layers
+  SnowflakeLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: snowflake-layer
+      Description: Snowflake ID generation layer
+      ContentUri: ./infra/lambda-layers/snowflake/dist/
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Delete
+
+  EncodingLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: encoding-layer
+      Description: Feistel network and Base58 encoding layer
+      ContentUri: ./infra/lambda-layers/encoding/dist/
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Delete
+
+  # Lambda Functions
+  CreateUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CreateUrlFunction
+      CodeUri: .
+      Handler: src/urls/handlers/createUrl.handler
+      Description: Creates a shortened URL
+      Timeout: 30
+      Environment:
+        Variables:
+          FEISTEL_SECRET: !Ref FEISTEL_SECRET
+          FEISTEL_ROUNDS: !Ref FEISTEL_ROUNDS
+          DOMAIN_BITS: !Ref DOMAIN_BITS
+          CODE_BASE: !Ref CODE_BASE
+          CODE_LENGTH: !Ref CODE_LENGTH
+          DATABASE_URL: !Ref DATABASE_URL
+          # FEISTEL_SECRET: local-dev-secret-key-change-in-production
+          # FEISTEL_ROUNDS: "4"
+          # DOMAIN_BITS: "64"
+          # CODE_BASE: "58"
+          # CODE_LENGTH: "6"
+          # DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/shorten_urls?connection_limit=5&pool_timeout=10
+      Layers:
+        - !Ref SnowflakeLayer
+        - !Ref EncodingLayer
+      Events:
+        CreateUrl:
+          Type: Api
+          Properties:
+            Path: /shorten
+            Method: POST
+            Auth:
+              Authorizer: NONE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/urls/handlers/createUrl.ts
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        External:
+          - "@aws-sdk/*"
+          - "aws-sdk"
+          - "snowflake"
+          - "encoding"
+          - "@prisma/client"
+        Loader:
+          - .ts=ts
+
+  RedirectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: RedirectFunction
+      CodeUri: .
+      Handler: src/urls/handlers/redirect.handler
+      Description: Redirects from short code to original URL
+      Timeout: 10
+      Layers:
+        - !Ref SnowflakeLayer
+        - !Ref EncodingLayer
+      Events:
+        Redirect:
+          Type: Api
+          Properties:
+            Path: /{code}
+            Method: GET
+            Auth:
+              Authorizer: NONE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/urls/handlers/redirect.ts
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        External:
+          - "@aws-sdk/*"
+          - "aws-sdk"
+          - "snowflake"
+          - "encoding"
+          - "@prisma/client"
+        Loader:
+          - .ts=ts
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL for local development
+    Value: !Sub "http://localhost:3000"
+
+  CreateUrlEndpoint:
+    Description: POST endpoint for creating short URLs
+    Value: !Sub "http://localhost:3000/shorten"
+
+  RedirectEndpoint:
+    Description: GET endpoint for redirecting
+    Value: !Sub "http://localhost:3000/{code}"

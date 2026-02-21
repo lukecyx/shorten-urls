@@ -2,8 +2,10 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 import { BaseLambdaConstruct } from "./constructs";
+import path from "path";
 
 export interface LambdaStackProps extends cdk.StackProps {
   vpc: ec2.Vpc;
@@ -21,10 +23,49 @@ export class LambdaStack extends cdk.Stack {
 
     this.lambdaSG = new ec2.SecurityGroup(this, "LambdaSG", { vpc: props.vpc });
 
+    const feistelSecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "FeistelSecret",
+      "FeistelKey",
+    );
+    const domainBitsSecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "DomainBitsSecret",
+      "DomainBits",
+    );
+    const feistelRoundsSecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "FeistelRoundsSecret",
+      "FeistelRounds",
+    );
+
+    const snowflakeLayer = new lambda.LayerVersion(this, "SnowflakeLayer", {
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "../lambda-layers/snowflake/dist")
+      ),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+      description: "Snowflake ID generation utility",
+    });
+
+    const encodingLayer = new lambda.LayerVersion(this, "EncodingLayer", {
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "../lambda-layers/encoding/dist")
+      ),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+      description: "Feistel network and Base58 encoding utilities",
+    });
+
     const createLambda = new BaseLambdaConstruct(this, "CreateUrlLambda", {
       entry: "src/urls/handlers/createUrl.ts",
       securityGroups: [this.lambdaSG],
       vpc: props.vpc,
+      layers: [snowflakeLayer, encodingLayer],
+      timeoutSeconds: 30,
+      environment: {
+        FEISTEL_SECRET_ARN: feistelSecret.secretArn,
+        FEISTEL_ROUNDS: feistelRoundsSecret.secretArn,
+        DOMAIN_BITS: domainBitsSecret.secretArn,
+      },
     });
     this.createFn = createLambda.fn;
 

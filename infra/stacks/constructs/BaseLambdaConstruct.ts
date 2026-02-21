@@ -12,6 +12,7 @@ export interface BaseLambdaProps {
   memorySize?: number;
   securityGroups?: ISecurityGroup[];
   vpc?: Vpc;
+  layers?: lambda.ILayerVersion[];
 }
 
 export class BaseLambdaConstruct extends Construct {
@@ -29,6 +30,7 @@ export class BaseLambdaConstruct extends Construct {
       environment: props.environment,
       securityGroups: props.securityGroups ?? [],
       vpc: props.vpc,
+      layers: props.layers,
 
       // bundling: {
       //   target: "node20",

@@ -1,0 +1,21 @@
+{
+  "name": "snowflake-layer",
+  "version": "1.0.0",
+  "description": "Lambda Layer for Snowflake ID generation",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["lambda-layer", "snowflake", "id-generation"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "glob": "^10.3.0",
+    "vitest": "^1.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
