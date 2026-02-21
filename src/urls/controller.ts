@@ -1,19 +1,36 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResultV2 } from "aws-lambda";
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { LambdaLoggingContext } from "~/lib/middleware/types";
+import { enrichContext } from "~/lib/types/context";
+import { createUrl as createUrlService } from "../services/urls/urlService";
+import { CreateUrlBody, ValidatedBody } from "~/lib/types";
 
 export async function createUrl(
-  event: APIGatewayProxyEvent,
+  event: ValidatedBody<CreateUrlBody>,
   context: LambdaLoggingContext,
 ): Promise<APIGatewayProxyResultV2> {
-  context.logger.info("Hello from the createUrl controller!!");
+  const ctx = enrichContext(context.requestContext, {
+    layer: "controller",
+    controller: "createUrl",
+    longUrl: event.body.longUrl,
+  });
+
+  ctx.logger.info("Processing createUrl request");
+
+  const urlCode = await createUrlService(event.body.longUrl, ctx);
+
+  ctx.logger.info("URL shortened successfully", { urlCode });
+
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: "create url controller called" }),
+    body: JSON.stringify({
+      message: "create url controller called",
+      urlCode,
+    }),
   };
 }
 
 export async function redirect(
-  event: APIGatewayProxyEvent,
+  event: APIGatewayProxyEventV2,
   context: LambdaLoggingContext,
 ): Promise<APIGatewayProxyResultV2> {
   console.log("redirect controlelr called");
