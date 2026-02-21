@@ -14,3 +14,13 @@ build/
 .env.dev
 .env.stage
 .env.prod
+
+/src/generated/prisma
+
+# SAM local development
+env.json
+docker-compose.override.yml
+.aws-sam/
+
+# Lambda layer build artifacts
+infra/lambda-layers/*/dist/
