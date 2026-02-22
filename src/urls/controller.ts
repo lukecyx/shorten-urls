@@ -1,7 +1,7 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { LambdaLoggingContext } from "~/lib/middleware/types";
 import { enrichContext } from "~/lib/types/context";
-import { createUrl as createUrlService } from "../services/urls/urlService";
+import { createUrl as createUrlService } from "../services/urls/createUrl";
 import { CreateUrlBody, ValidatedBody } from "~/lib/types";
 
 export async function createUrl(

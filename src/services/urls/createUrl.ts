@@ -7,41 +7,7 @@ import {
 } from "~/layers";
 import { fetchSecret } from "../utils";
 import { Prisma } from "~/generated/prisma";
-
-export async function redirect(shortUrl: string, ctx: RequestContext) {
-  const serviceCtx = enrichContext(ctx, {
-    layer: "service",
-    service: "urls",
-    operation: "redirect",
-    shortUrl,
-  });
-
-  try {
-    serviceCtx.logger.info("Looking up long URL");
-    const url = await ctx.db?.url.findFirst({
-      where: {
-        shortCode: shortUrl,
-      },
-    });
-
-    if (!url) {
-      serviceCtx.logger.error("Short URL not found", { shortUrl });
-
-      throw new Error("Short URL not found");
-    }
-
-    serviceCtx.logger.info("Found longUrl for shortCodce", {
-      shortUrl,
-      longUrl: url.longUrl,
-    });
-
-    return url.longUrl;
-  } catch (error) {
-    serviceCtx.logger.error("Error redirecting URL", { error });
-
-    throw error;
-  }
-}
+import { v7 as uuidv7 } from "uuid";
 
 async function getShortCode(longUrl: string, ctx: RequestContext) {
   const getShortCodeCtx = enrichContext(ctx, {
@@ -114,6 +80,7 @@ export async function createUrl(longUrl: string, ctx: RequestContext) {
     try {
       const result = await ctx.db?.url.create({
         data: {
+          id: uuidv7(),
           shortCode,
           longUrl,
         },

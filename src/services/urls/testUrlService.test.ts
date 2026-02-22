@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 
-import { createUrl } from "./urlService";
+import { createUrl } from "./createUrl";
 import { Prisma, PrismaClient } from "~/generated/prisma";
 import { encodeToBase58, generateSnowflakeId } from "~/layers";
 
