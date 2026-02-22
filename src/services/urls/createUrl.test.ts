@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { createUrl } from "./createUrl";
-import { Prisma, PrismaClient } from "~/generated/prisma";
+import { Prisma } from "~/generated/prisma";
 import { encodeToBase58, generateSnowflakeId } from "~/layers";
 
 import { db, createMockContext } from "~/testUtils";
