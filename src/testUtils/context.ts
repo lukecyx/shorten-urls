@@ -11,5 +11,5 @@ export function createMockContext(
     requestId: "req-test-123",
     db: db,
     ...overrides,
-  };
+  } as RequestContext;
 }

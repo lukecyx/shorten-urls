@@ -21,7 +21,7 @@ export class ApiGwStack extends cdk.Stack {
       .addMethod("POST", new apigw.LambdaIntegration(props.createFn));
 
     api.root
-      .addResource("{code}")
+      .addResource("{urlCode}")
       .addMethod("GET", new apigw.LambdaIntegration(props.redirectFn));
   }
 }

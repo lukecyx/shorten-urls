@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Url {
-  id        String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  id        String   @id @db.Uuid
   shortCode String   @unique
   longUrl   String
   createdAt DateTime @default(now())

@@ -31,7 +31,10 @@
     "@middy/core": "^6.4.5",
     "@middy/http-error-handler": "^6.4.5",
     "@middy/http-json-body-parser": "^6.4.5",
+    "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.3.0",
+    "pg": "^8.18.0",
+    "uuid": "^13.0.0",
     "vitest-mock-extended": "^3.1.0",
     "winston": "^3.17.0",
     "zod": "^4.3.6"
@@ -39,6 +42,7 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.160",
     "@types/node": "^25.0.10",
+    "@types/pg": "^8.16.0",
     "aws-cdk": "^2.1104.0",
     "aws-cdk-lib": "^2.236.0",
     "chokidar-cli": "^3.0.0",

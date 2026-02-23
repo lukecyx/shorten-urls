@@ -10,6 +10,7 @@ Globals:
     Environment:
       Variables:
         NODE_OPTIONS: "--enable-source-maps"
+        DATABASE_URL: !Ref DATABASE_URL
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
@@ -58,7 +59,6 @@ Resources:
           DOMAIN_BITS: !Ref DOMAIN_BITS
           CODE_BASE: !Ref CODE_BASE
           CODE_LENGTH: !Ref CODE_LENGTH
-          DATABASE_URL: !Ref DATABASE_URL
           # FEISTEL_SECRET: local-dev-secret-key-change-in-production
           # FEISTEL_ROUNDS: "4"
           # DOMAIN_BITS: "64"
@@ -108,7 +108,7 @@ Resources:
         Redirect:
           Type: Api
           Properties:
-            Path: /{code}
+            Path: /{urlCode}
             Method: GET
             Auth:
               Authorizer: NONE

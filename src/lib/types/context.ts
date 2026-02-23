@@ -1,13 +1,11 @@
+import { Context } from "aws-lambda";
 import winston from "winston";
 import { PrismaClient } from "~/generated/prisma";
 
-/**
- * Request context that flows through the entire request lifecycle.
- */
-export interface RequestContext {
+export interface RequestContext extends Context {
   logger: winston.Logger;
   requestId: string;
-  db?: PrismaClient;
+  db: PrismaClient;
 }
 
 export function enrichContext(
@@ -19,4 +17,3 @@ export function enrichContext(
     logger: ctx.logger.child(metadata),
   };
 }
-
