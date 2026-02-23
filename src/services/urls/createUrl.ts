@@ -78,7 +78,7 @@ export async function createUrl(longUrl: string, ctx: RequestContext) {
     shortCode = await getShortCode(longUrl, ctx);
 
     try {
-      const result = await ctx.db?.url.create({
+      const result = await ctx.db.url.create({
         data: {
           id: uuidv7(),
           shortCode,
