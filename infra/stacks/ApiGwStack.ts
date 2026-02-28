@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 interface Props extends cdk.StackProps {
   createFn: lambda.Function;
@@ -9,18 +10,36 @@ interface Props extends cdk.StackProps {
 }
 
 export class ApiGwStack extends cdk.Stack {
+  public readonly api: apigw.RestApi;
+
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
 
-    const api = new apigw.RestApi(this, "DevApi", {
-      restApiName: "dev-url-shortener",
+    const apiResourcePolicy = new iam.PolicyDocument({
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.DENY,
+          principals: [new iam.AnyPrincipal()],
+          actions: ["execute-api:Invoke"],
+          conditions: {
+            NotIpAddress: {
+              "aws:SourceIp": ["com.amazonaws.global.cloudfront.origin-facing"],
+            },
+          },
+        }),
+      ],
     });
 
-    api.root
+    this.api = new apigw.RestApi(this, "DevApi", {
+      restApiName: "dev-url-shortener",
+      policy: apiResourcePolicy,
+    });
+
+    this.api.root
       .addResource("shorten")
       .addMethod("POST", new apigw.LambdaIntegration(props.createFn));
 
-    api.root
+    this.api.root
       .addResource("{urlCode}")
       .addMethod("GET", new apigw.LambdaIntegration(props.redirectFn));
   }

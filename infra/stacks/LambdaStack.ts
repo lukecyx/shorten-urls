@@ -41,7 +41,7 @@ export class LambdaStack extends cdk.Stack {
 
     const snowflakeLayer = new lambda.LayerVersion(this, "SnowflakeLayer", {
       code: lambda.Code.fromAsset(
-        path.join(__dirname, "../lambda-layers/snowflake/dist")
+        path.join(import.meta.dirname, "../lambda-layers/snowflake/dist")
       ),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       description: "Snowflake ID generation utility",
@@ -49,7 +49,7 @@ export class LambdaStack extends cdk.Stack {
 
     const encodingLayer = new lambda.LayerVersion(this, "EncodingLayer", {
       code: lambda.Code.fromAsset(
-        path.join(__dirname, "../lambda-layers/encoding/dist")
+        path.join(import.meta.dirname, "../lambda-layers/encoding/dist")
       ),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       description: "Feistel network and Base58 encoding utilities",
