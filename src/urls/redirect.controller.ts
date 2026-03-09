@@ -1,6 +1,7 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
-import { enrichContext, RequestContext } from "~/lib/types/context";
+import { SeverityNumber } from "@opentelemetry/api-logs";
 
+import { RequestContext } from "~/lib/types/context";
 import { redirect as redirectService } from "~/services/urls/redirect";
 
 export async function redirect(
@@ -8,16 +9,21 @@ export async function redirect(
   context: RequestContext,
 ): Promise<APIGatewayProxyResultV2> {
   const urlCode = event.pathParameters?.urlCode;
-  const ctx = enrichContext(context, {
-    layer: "controller",
-    controller: "redirect",
-    urlCode,
+
+  context.logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: "Processing redirect request",
+    attributes: { layer: "controller", controller: "redirect", urlCode },
   });
 
-  ctx.logger.info("Processing redirect request");
-
   if (!urlCode) {
-    ctx.logger.error("urlCode not found in request");
+    context.logger.emit({
+      severityNumber: SeverityNumber.ERROR,
+      severityText: "ERROR",
+      body: "urlCode not found in request",
+      attributes: { layer: "controller", controller: "redirect" },
+    });
 
     return {
       statusCode: 400,
@@ -26,21 +32,16 @@ export async function redirect(
   }
 
   try {
-    const urlRecord = await redirectService(urlCode, ctx);
+    const urlRecord = await redirectService(urlCode, context);
 
     return {
       statusCode: 302,
-      headers: {
-        contentType: "application/json",
-        Location: urlRecord.longUrl,
-      },
+      headers: { contentType: "application/json", Location: urlRecord.longUrl },
     };
   } catch (error) {
     return {
       statusCode: 500,
-      headers: {
-        contentType: "application/json",
-      },
+      headers: { contentType: "application/json" },
       body: JSON.stringify({ message: "Internal server error", error }),
     };
   }

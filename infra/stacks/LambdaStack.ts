@@ -41,7 +41,7 @@ export class LambdaStack extends cdk.Stack {
 
     const snowflakeLayer = new lambda.LayerVersion(this, "SnowflakeLayer", {
       code: lambda.Code.fromAsset(
-        path.join(import.meta.dirname, "../lambda-layers/snowflake/dist")
+        path.join(import.meta.dirname, "../lambda-layers/snowflake/dist"),
       ),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       description: "Snowflake ID generation utility",
@@ -49,7 +49,7 @@ export class LambdaStack extends cdk.Stack {
 
     const encodingLayer = new lambda.LayerVersion(this, "EncodingLayer", {
       code: lambda.Code.fromAsset(
-        path.join(import.meta.dirname, "../lambda-layers/encoding/dist")
+        path.join(import.meta.dirname, "../lambda-layers/encoding/dist"),
       ),
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
       description: "Feistel network and Base58 encoding utilities",
@@ -63,16 +63,24 @@ export class LambdaStack extends cdk.Stack {
       timeoutSeconds: 30,
       environment: {
         FEISTEL_SECRET_ARN: feistelSecret.secretArn,
-        FEISTEL_ROUNDS: feistelRoundsSecret.secretArn,
-        DOMAIN_BITS: domainBitsSecret.secretArn,
+        FEISTEL_ROUNDS_ARN: feistelRoundsSecret.secretArn,
+        DOMAIN_BITS_ARN: domainBitsSecret.secretArn,
+        CODE_BASE: "58",
+        CODE_LENGTH: "6",
       },
     });
+
+    feistelSecret.grantRead(createLambda.fn);
+    domainBitsSecret.grantRead(createLambda.fn);
+    feistelRoundsSecret.grantRead(createLambda.fn);
+
     this.createFn = createLambda.fn;
 
     const redirectLambda = new BaseLambdaConstruct(this, "RedirectLambda", {
       entry: "src/urls/handlers/redirect.ts",
       securityGroups: [this.lambdaSG],
       vpc: props.vpc,
+      layers: [],
     });
     this.redirectFn = redirectLambda.fn;
 

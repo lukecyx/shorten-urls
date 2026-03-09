@@ -35,6 +35,16 @@ services:
     networks:
       - shorten-urls-network
 
+  lgtm:
+    image: grafana/otel-lgtm:latest
+    container_name: shorten-urls-lgtm
+    ports:
+      - "3001:3000" # Grafana UI
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    networks:
+      - shorten-urls-network
+
 volumes:
   postgres_data:
     name: shorten-urls-postgres-data
