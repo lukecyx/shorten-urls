@@ -3,9 +3,11 @@ import { Construct } from "constructs";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import { RestApiOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { RestApi } from "aws-cdk-lib/aws-apigateway";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 export interface ReverseProxyStackProps extends cdk.StackProps {
   api: RestApi;
+  originVerifySecret: secretsmanager.ISecret;
 }
 
 export class ReverseProxyStack extends cdk.Stack {
@@ -17,7 +19,6 @@ export class ReverseProxyStack extends cdk.Stack {
     const traceparentFn = new cloudfront.Function(this, "TraceparentFunction", {
       runtime: cloudfront.FunctionRuntime.JS_2_0,
       code: cloudfront.FunctionCode.fromFile({
-        // filePath: "../cloudfront-functions/traceparent.js",
         filePath: "./infra/cloudfront-functions/traceparent.js",
       }),
     });
@@ -36,7 +37,14 @@ export class ReverseProxyStack extends cdk.Stack {
       "ReverseProxyDistribution",
       {
         defaultBehavior: {
-          origin: new RestApiOrigin(props.api),
+          origin: new RestApiOrigin(props.api, {
+            customHeaders: {
+              "x-origin-verify":
+                props.originVerifySecret.secretValue.toString(),
+            },
+          }),
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
           originRequestPolicy: traceparentPolicy,
           functionAssociations: [
             {
