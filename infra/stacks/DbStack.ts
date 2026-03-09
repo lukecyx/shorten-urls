@@ -19,22 +19,31 @@ export class DbStack extends cdk.Stack {
       vpc: props.vpc,
     });
 
-    const db = new rds.DatabaseInstance(this, "Postgres", {
-      engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_15,
+    const db = new rds.DatabaseCluster(this, "Postgres", {
+      engine: rds.DatabaseClusterEngine.auroraPostgres({
+        version: rds.AuroraPostgresEngineVersion.VER_17_7,
       }),
       vpc: props.vpc,
       // Stores a random password in secrets manager.
       credentials: rds.Credentials.fromGeneratedSecret("postgres"),
-      instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE3,
-        ec2.InstanceSize.MICRO,
-      ),
-      multiAz: true,
-      allocatedStorage: 20,
-      publiclyAccessible: false,
+      writer: rds.ClusterInstance.provisioned("Writer", {
+        instanceType: ec2.InstanceType.of(
+          ec2.InstanceClass.BURSTABLE4_GRAVITON,
+          ec2.InstanceSize.MEDIUM,
+        ),
+        publiclyAccessible: false,
+      }),
+      readers: [
+        rds.ClusterInstance.provisioned("Reader", {
+          instanceType: ec2.InstanceType.of(
+            ec2.InstanceClass.BURSTABLE4_GRAVITON,
+            ec2.InstanceSize.MEDIUM,
+          ),
+          publiclyAccessible: false,
+        }),
+      ],
       securityGroups: [this.securityGroup],
-      databaseName: process.env.DB_NAME,
+      defaultDatabaseName: process.env.DB_NAME,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
@@ -43,8 +52,8 @@ export class DbStack extends cdk.Stack {
     new ssm.StringParameter(this, "DbConnectionDev", {
       parameterName: "/db/connectionJSON",
       stringValue: JSON.stringify({
-        host: db.dbInstanceEndpointAddress,
-        port: db.dbInstanceEndpointPort,
+        host: db.clusterEndpoint.hostname,
+        port: db.clusterEndpoint.port,
         username: secret.secretValueFromJson("username").toString(),
         database: process.env.DB_NAME,
       }),
