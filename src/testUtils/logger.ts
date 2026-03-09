@@ -1,5 +1,4 @@
 import { mockDeep } from "vitest-mock-extended";
-import { Logger } from "winston";
+import { Logger } from "@opentelemetry/api-logs";
 
 export const logger = mockDeep<Logger>();
-(logger as any).child.mockReturnValue(logger);

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { decodeBase58, encodeBase58 } from "./base58";
 
-describe(encodeBase58.name, () => {
+describe("encoding.base58", () => {
   it.each([
     { num: 123n, expected: "111138" },
     { num: 15_999n, expected: "1115kr" },

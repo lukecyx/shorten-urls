@@ -2,16 +2,17 @@
 
 import * as cdk from "aws-cdk-lib";
 import {
+  ApiGwStack,
   CacheStack,
   DbStack,
   LambdaStack,
   NetworkStack,
   RedisSecretStack,
+  ReverseProxyStack,
 } from "../infra/stacks";
 
 const app = new cdk.App();
 const stage = app.node.tryGetContext("stage") ?? "dev";
-console.log("ACC_ID", process.env.CDK_DEFAULT_ACCOUNT);
 
 if (stage === "dev") {
   const network = new NetworkStack(app, `NetworkStack-${stage}`, {
@@ -55,6 +56,24 @@ if (stage === "dev") {
     vpc: network.vpc,
     dbSecurityGroup: postgres.securityGroup,
     redisSecurityGroup: redis.securityGroup,
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: "eu-west-2",
+    },
+  });
+
+  const apiGw = new ApiGwStack(app, `ApiGwStack-${stage}`, {
+    createFn: lambdas.createFn,
+    redirectFn: lambdas.redirectFn,
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: "eu-west-2",
+    },
+  });
+
+  new ReverseProxyStack(app, `ReverseProxyStack-${stage}`, {
+    api: apiGw.api,
+    originVerifySecret: apiGw.originVerifySecret,
     env: {
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: "eu-west-2",

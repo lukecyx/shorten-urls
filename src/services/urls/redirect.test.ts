@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { SeverityNumber } from "@opentelemetry/api-logs";
 
 import { redirect } from "./redirect";
 
@@ -18,7 +19,7 @@ const record = {
   updatedAt: new Date(),
 };
 
-describe(redirect.name, () => {
+describe("redirect.service", () => {
   it("throws an error if longUrl is not found", async () => {
     db.url.findUnique.mockResolvedValueOnce(null);
     const ctx = createMockContext({ db });
@@ -27,11 +28,14 @@ describe(redirect.name, () => {
       "longUrl not found for shortUrl",
     );
 
-    expect(ctx.logger.error).toHaveBeenCalledWith(
-      "longUrl not found for shortUrl",
-      {
-        shortUrl: "https://localhost.com/aBc123",
-      },
+    expect(ctx.logger.emit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severityNumber: SeverityNumber.ERROR,
+        body: "longUrl not found for shortUrl",
+        attributes: expect.objectContaining({
+          shortUrl: "https://localhost.com/aBc123",
+        }),
+      }),
     );
   });
 

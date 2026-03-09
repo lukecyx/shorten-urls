@@ -11,6 +11,7 @@ Globals:
       Variables:
         NODE_OPTIONS: "--enable-source-maps"
         DATABASE_URL: !Ref DATABASE_URL
+        OTLP_ENDPOINT: "http://host.docker.internal:4318"
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"

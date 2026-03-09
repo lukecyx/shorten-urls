@@ -1,5 +1,7 @@
 import { APIGatewayProxyResultV2 } from "aws-lambda";
-import { RequestContext, enrichContext } from "~/lib/types/context";
+import { SeverityNumber } from "@opentelemetry/api-logs";
+
+import { RequestContext } from "~/lib/types/context";
 import { createUrl as createUrlService } from "~/services/urls/createUrl";
 import { CreateUrlBody, ValidatedBody } from "~/lib/types";
 
@@ -7,26 +9,38 @@ export async function createUrl(
   event: ValidatedBody<CreateUrlBody>,
   context: RequestContext,
 ): Promise<APIGatewayProxyResultV2> {
-  const ctx = enrichContext(context, {
-    layer: "controller",
-    controller: "createUrl",
-    longUrl: event.body.longUrl,
+  context.logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: "Processing createUrl request",
+    attributes: {
+      layer: "controller",
+      controller: "createUrl",
+      longUrl: event.body.longUrl,
+    },
   });
 
-  ctx.logger.info("Processing createUrl request");
+  try {
+    const urlCode = await createUrlService(event.body.longUrl, context);
 
-  const urlCode = await createUrlService(event.body.longUrl, ctx);
+    context.logger.emit({
+      severityNumber: SeverityNumber.INFO,
+      severityText: "INFO",
+      body: "URL shortened successfully",
+      attributes: { layer: "controller", controller: "createUrl", urlCode },
+    });
 
-  ctx.logger.info("URL shortened successfully", { urlCode });
-
-  return {
-    statusCode: 200,
-    headers: {
-      ContentType: "application/json",
-    },
-    body: JSON.stringify({
-      message: "URL shortened successfully",
-      urlCode,
-    }),
-  };
+    return {
+      statusCode: 200,
+      headers: { ContentType: "application/json" },
+      body: JSON.stringify({ message: "URL shortened successfully", urlCode }),
+    };
+  } catch (error) {
+    console.log("ERROR", error);
+    return {
+      statusCode: 500,
+      headers: { ContentType: "application/json" },
+      body: JSON.stringify({ message: "Internal server error", error }),
+    };
+  }
 }

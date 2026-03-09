@@ -1,7 +1,7 @@
 export const env = {
-  feistelSecret: required("FEISTEL_SECRET"),
-  feistelRounds: required("FEISTEL_ROUNDS"),
-  domainBits: required("DOMAIN_BITS"),
+  feistelSecret: optional("FEISTEL_SECRET"),
+  feistelRounds: optional("FEISTEL_ROUNDS"),
+  domainBits: optional("DOMAIN_BITS"),
   codeBase: required("CODE_BASE"),
   codeLength: required("CODE_LENGTH"),
 };

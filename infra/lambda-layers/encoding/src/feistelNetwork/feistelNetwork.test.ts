@@ -19,7 +19,7 @@ const FEISTEL_CONTEXT = createFeistelContext(
   6n,
 );
 
-describe(encodeFeistel.name, () => {
+describe("encoding.feistel", () => {
   it("is a bijection", () => {
     for (let i = 0n; i < 10_000n; i++) {
       const encoded = encodeFeistel(i, FEISTEL_CONTEXT);

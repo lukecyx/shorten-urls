@@ -10,21 +10,7 @@ vi.mock("~/config");
 vi.mock("~/layers");
 vi.mock("../utils");
 
-describe(createUrl.name, () => {
-  it("enriches the context with service metadata", async () => {
-    const ctx = createMockContext();
-
-    createUrl("https://example.com/long/path", ctx);
-
-    expect((ctx.logger as any).child).toHaveBeenCalledWith(
-      expect.objectContaining({
-        layer: "service",
-        service: "urls",
-        operation: "createUrl",
-      }),
-    );
-  });
-
+describe("createUrl.service", () => {
   it("calls generateSnowflakeId to produce a unique ID", async () => {
     const ctx = createMockContext();
 
@@ -40,17 +26,16 @@ describe(createUrl.name, () => {
   });
 
   it("retries on a P2002 unique-constraint violation and returns the code on the next attempt", async () => {
-    // Simulate a different short code being generated on the retry.
     vi.mocked(encodeToBase58)
-      .mockReturnValueOnce("aBc123") // first attempt — will collide
-      .mockReturnValueOnce("xYz789"); // second attempt — succeeds
+      .mockReturnValueOnce("aBc123")
+      .mockReturnValueOnce("xYz789");
 
     const p2002 = new Prisma.PrismaClientKnownRequestError(
       "Unique constraint failed",
       { code: "P2002", clientVersion: "5.0.0" },
     );
 
-    db.url.create.mockRejectedValueOnce(p2002); // first attempt: collision
+    db.url.create.mockRejectedValueOnce(p2002);
 
     const ctx = createMockContext();
     const result = await createUrl("https://example.com", ctx);
@@ -62,10 +47,7 @@ describe(createUrl.name, () => {
   it("throws after exceeding maxAttempts consecutive P2002 errors", async () => {
     const p2002 = new Prisma.PrismaClientKnownRequestError(
       "Unique constraint failed",
-      {
-        code: "P2002",
-        clientVersion: "5.0.0",
-      },
+      { code: "P2002", clientVersion: "5.0.0" },
     );
     db.url.create.mockRejectedValue(p2002);
     const ctx = createMockContext({ db });

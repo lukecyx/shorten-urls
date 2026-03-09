@@ -4,6 +4,7 @@ import { NetworkStack } from "./NetworkStack";
 import { CacheStack } from "./CacheStack";
 import { DbStack } from "./DbStack";
 import { RedisSecretStack } from "./RedisSecretStack";
+import { ReverseProxyStack } from "./ReverseProxyStack";
 
 export {
   ApiGwStack,
@@ -12,4 +13,5 @@ export {
   DbStack,
   CacheStack,
   RedisSecretStack,
+  ReverseProxyStack,
 };
