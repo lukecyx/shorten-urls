@@ -1,3 +1,5 @@
+import { env } from "~/config";
+import { fetchSecret } from "~/services/utils";
 import { PrismaClient } from "../../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -20,11 +22,14 @@ let prisma: PrismaClient | null = null;
  *
  * @returns PrismaClient instance
  */
-export function getDb(): PrismaClient {
+export async function getDb(): Promise<PrismaClient> {
   if (!prisma) {
+    const DB_URL =
+      env.databaseUrl ?? (await fetchSecret(process.env.DB_SECRET_ARN!));
     const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: DB_URL,
     });
+
     prisma = new PrismaClient({
       adapter,
       log:
@@ -46,6 +51,3 @@ export async function disconnectDb(): Promise<void> {
     prisma = null;
   }
 }
-
-// Initialize the client at module level for Lambda
-export const db = getDb();

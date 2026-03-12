@@ -4,8 +4,8 @@ import { getDb } from "../db";
 import { RequestContext } from "~/lib/types/context";
 
 export const dbMiddleware = (): MiddlewareObj<APIGatewayProxyEventV2> => ({
-  before: (handler) => {
+  before: async (handler) => {
     const ctx = handler.context as unknown as RequestContext;
-    ctx.db = getDb();
+    ctx.db = await getDb();
   },
 });

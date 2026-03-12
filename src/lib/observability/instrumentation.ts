@@ -1,10 +1,8 @@
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
-import {
-  ConsoleLogRecordExporter,
-  SimpleLogRecordProcessor,
-} from "@opentelemetry/sdk-logs";
+import { SimpleLogRecordProcessor } from "@opentelemetry/sdk-logs";
+import { PrettyConsoleLogExporter } from "./consoleExporter";
 import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { resourceFromAttributes } from "@opentelemetry/resources";
@@ -29,7 +27,7 @@ export function initSDK() {
       ),
     ],
     logRecordProcessors: [
-      new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
+      new SimpleLogRecordProcessor(new PrettyConsoleLogExporter()),
       ...(base
         ? [
             new SimpleLogRecordProcessor(

@@ -56,6 +56,7 @@ if (stage === "dev") {
     vpc: network.vpc,
     dbSecurityGroup: postgres.securityGroup,
     redisSecurityGroup: redis.securityGroup,
+    dbSecret: postgres.dbSecret,
     env: {
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: "eu-west-2",

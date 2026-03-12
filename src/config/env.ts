@@ -4,6 +4,7 @@ export const env = {
   domainBits: optional("DOMAIN_BITS"),
   codeBase: required("CODE_BASE"),
   codeLength: required("CODE_LENGTH"),
+  databaseUrl: optional("DATABASE_URL"),
 };
 
 function required(name: string): string {

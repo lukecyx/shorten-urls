@@ -10,6 +10,7 @@ import path from "path";
 export interface LambdaStackProps extends cdk.StackProps {
   vpc: ec2.Vpc;
   dbSecurityGroup: ec2.SecurityGroup;
+  dbSecret: secretsmanager.ISecret;
   redisSecurityGroup: ec2.SecurityGroup;
 }
 
@@ -67,12 +68,14 @@ export class LambdaStack extends cdk.Stack {
         DOMAIN_BITS_ARN: domainBitsSecret.secretArn,
         CODE_BASE: "58",
         CODE_LENGTH: "6",
+        DB_SECRET_ARN: props.dbSecret.secretArn,
       },
     });
 
     feistelSecret.grantRead(createLambda.fn);
     domainBitsSecret.grantRead(createLambda.fn);
     feistelRoundsSecret.grantRead(createLambda.fn);
+    props.dbSecret.grantRead(createLambda.fn);
 
     this.createFn = createLambda.fn;
 
@@ -81,7 +84,11 @@ export class LambdaStack extends cdk.Stack {
       securityGroups: [this.lambdaSG],
       vpc: props.vpc,
       layers: [],
+      environment: {
+        DB_SECRET_ARN: props.dbSecret.secretArn,
+      },
     });
+    props.dbSecret.grantRead(redirectLambda.fn);
     this.redirectFn = redirectLambda.fn;
 
     props.dbSecurityGroup.addIngressRule(this.lambdaSG, ec2.Port.tcp(5432));

@@ -65,14 +65,14 @@ export const logMiddleware = (): MiddlewareObj<APIGatewayProxyEventV2> => {
         body: "Request failed",
         attributes: {
           "exception.type": error instanceof Error ? error.name : typeof error,
-          "exception.message":
-            error instanceof Error ? error.message : String(error),
+          "exception.message": error instanceof Error ? error.message : error,
           "exception.stacktrace":
             error instanceof Error ? error.stack : undefined,
         },
       });
 
       (ctx as any).__span?.end();
+      throw error;
     },
   };
 };

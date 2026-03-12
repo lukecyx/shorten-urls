@@ -3,6 +3,7 @@ import { Construct } from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import { ISecret } from "aws-cdk-lib/aws-secretsmanager";
 
 export interface DbStackProps extends cdk.StackProps {
   stage: string;
@@ -11,6 +12,7 @@ export interface DbStackProps extends cdk.StackProps {
 
 export class DbStack extends cdk.Stack {
   public readonly securityGroup: ec2.SecurityGroup;
+  public readonly dbSecret: ISecret;
 
   constructor(scope: Construct, id: string, props: DbStackProps) {
     super(scope, id, props);
@@ -48,6 +50,7 @@ export class DbStack extends cdk.Stack {
     });
 
     const secret = db.secret!;
+    this.dbSecret = secret;
 
     new ssm.StringParameter(this, "DbConnectionDev", {
       parameterName: "/db/connectionJSON",

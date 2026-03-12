@@ -36,11 +36,8 @@ export async function createUrl(
       body: JSON.stringify({ message: "URL shortened successfully", urlCode }),
     };
   } catch (error) {
-    console.log("ERROR", error);
-    return {
-      statusCode: 500,
-      headers: { ContentType: "application/json" },
-      body: JSON.stringify({ message: "Internal server error", error }),
-    };
+    const err = error as Error;
+
+    throw err;
   }
 }
