@@ -9,6 +9,7 @@ import {
   NetworkStack,
   RedisSecretStack,
   ReverseProxyStack,
+  WafStack,
 } from "../infra/stacks";
 
 const app = new cdk.App();
@@ -72,9 +73,18 @@ if (stage === "dev") {
     },
   });
 
+  const waf = new WafStack(app, `WafStack-${stage}`, {
+    stage,
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: "us-east-1",
+    },
+  });
+
   new ReverseProxyStack(app, `ReverseProxyStack-${stage}`, {
     api: apiGw.api,
     originVerifySecret: apiGw.originVerifySecret,
+    webAclId: waf.waf.attrArn,
     env: {
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: "eu-west-2",

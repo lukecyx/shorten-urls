@@ -5,6 +5,7 @@ import { CacheStack } from "./CacheStack";
 import { DbStack } from "./DbStack";
 import { RedisSecretStack } from "./RedisSecretStack";
 import { ReverseProxyStack } from "./ReverseProxyStack";
+import { WafStack } from "./WafStack";
 
 export {
   ApiGwStack,
@@ -14,4 +15,5 @@ export {
   CacheStack,
   RedisSecretStack,
   ReverseProxyStack,
+  WafStack,
 };

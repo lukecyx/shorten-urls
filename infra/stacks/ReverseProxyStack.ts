@@ -8,6 +8,7 @@ import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 export interface ReverseProxyStackProps extends cdk.StackProps {
   api: RestApi;
   originVerifySecret: secretsmanager.ISecret;
+  webAclId: string;
 }
 
 export class ReverseProxyStack extends cdk.Stack {
@@ -36,6 +37,7 @@ export class ReverseProxyStack extends cdk.Stack {
       this,
       "ReverseProxyDistribution",
       {
+        webAclId: props.webAclId,
         defaultBehavior: {
           origin: new RestApiOrigin(props.api, {
             customHeaders: {
