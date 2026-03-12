@@ -50,8 +50,7 @@ export class ApiGwStack extends cdk.Stack {
           action: { allow: {} },
           statement: {
             byteMatchStatement: {
-              searchString:
-                this.originVerifySecret.secretValue.unsafeUnwrap(),
+              searchString: this.originVerifySecret.secretValue.toString(),
               fieldToMatch: {
                 singleHeader: { name: "x-origin-verify" },
               },
