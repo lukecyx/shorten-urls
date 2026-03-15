@@ -13,6 +13,7 @@ interface Props extends cdk.StackProps {
 export class ApiGwStack extends cdk.Stack {
   public readonly api: apigw.RestApi;
   public readonly originVerifySecret: secretsmanager.Secret;
+  public readonly originVerifySecretName: string;
 
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
@@ -21,12 +22,15 @@ export class ApiGwStack extends cdk.Stack {
       this,
       "OriginVerifySecret",
       {
+        secretName: "origin-verify-secret",
         generateSecretString: {
           excludePunctuation: true,
           passwordLength: 32,
         },
+        replicaRegions: [{ region: "us-east-1" }],
       },
     );
+    this.originVerifySecretName = this.originVerifySecret.secretName;
 
     this.api = new apigw.RestApi(this, "DevApi", {
       restApiName: "dev-url-shortener",

@@ -67,6 +67,7 @@ if (stage === "dev") {
   const apiGw = new ApiGwStack(app, `ApiGwStack-${stage}`, {
     createFn: lambdas.createFn,
     redirectFn: lambdas.redirectFn,
+    crossRegionReferences: true,
     env: {
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: "eu-west-2",
@@ -83,11 +84,12 @@ if (stage === "dev") {
 
   new ReverseProxyStack(app, `ReverseProxyStack-${stage}`, {
     api: apiGw.api,
-    originVerifySecret: apiGw.originVerifySecret,
+    originVerifySecretName: apiGw.originVerifySecretName,
     webAclId: waf.waf.attrArn,
+    crossRegionReferences: true,
     env: {
       account: process.env.CDK_DEFAULT_ACCOUNT,
-      region: "eu-west-2",
+      region: "us-east-1",
     },
   });
 }

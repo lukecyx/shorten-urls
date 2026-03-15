@@ -7,7 +7,7 @@ import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 export interface ReverseProxyStackProps extends cdk.StackProps {
   api: RestApi;
-  originVerifySecret: secretsmanager.ISecret;
+  originVerifySecretName: string;
   webAclId: string;
 }
 
@@ -16,6 +16,12 @@ export class ReverseProxyStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: ReverseProxyStackProps) {
     super(scope, id, props);
+
+    const originVerifySecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "OriginVerifySecret",
+      props.originVerifySecretName,
+    );
 
     const traceparentFn = new cloudfront.Function(this, "TraceparentFunction", {
       runtime: cloudfront.FunctionRuntime.JS_2_0,
@@ -41,8 +47,7 @@ export class ReverseProxyStack extends cdk.Stack {
         defaultBehavior: {
           origin: new RestApiOrigin(props.api, {
             customHeaders: {
-              "x-origin-verify":
-                props.originVerifySecret.secretValue.toString(),
+              "x-origin-verify": originVerifySecret.secretValue.toString(),
             },
           }),
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
