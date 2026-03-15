@@ -91,7 +91,19 @@ export class LambdaStack extends cdk.Stack {
     props.dbSecret.grantRead(redirectLambda.fn);
     this.redirectFn = redirectLambda.fn;
 
-    props.dbSecurityGroup.addIngressRule(this.lambdaSG, ec2.Port.tcp(5432));
-    props.redisSecurityGroup.addIngressRule(this.lambdaSG, ec2.Port.tcp(6379));
+    new ec2.CfnSecurityGroupIngress(this, "DbIngressFromLambda", {
+      groupId: props.dbSecurityGroup.securityGroupId,
+      ipProtocol: "tcp",
+      fromPort: 5432,
+      toPort: 5432,
+      sourceSecurityGroupId: this.lambdaSG.securityGroupId,
+    });
+    new ec2.CfnSecurityGroupIngress(this, "RedisIngressFromLambda", {
+      groupId: props.redisSecurityGroup.securityGroupId,
+      ipProtocol: "tcp",
+      fromPort: 6379,
+      toPort: 6379,
+      sourceSecurityGroupId: this.lambdaSG.securityGroupId,
+    });
   }
 }
