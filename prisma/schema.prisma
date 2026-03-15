@@ -15,10 +15,10 @@ datasource db {
 
 model Url {
   id        String   @id @db.Uuid
-  shortCode String   @unique
-  longUrl   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  shortCode String   @unique @map("short_code")
+  longUrl   String   @map("long_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([shortCode])
   @@map("urls")
