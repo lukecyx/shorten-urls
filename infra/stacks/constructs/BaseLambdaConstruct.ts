@@ -13,7 +13,7 @@ export interface BaseLambdaProps {
   memorySize?: number;
   securityGroups?: ISecurityGroup[];
   vpc?: Vpc;
-  layers: lambda.ILayerVersion[];
+  layers?: lambda.ILayerVersion[] | undefined;
 }
 
 export class BaseLambdaConstruct extends Construct {
@@ -47,7 +47,7 @@ export class BaseLambdaConstruct extends Construct {
       },
       securityGroups: props.securityGroups ?? [],
       vpc: props.vpc,
-      layers: [...props.layers, adotLayer],
+      layers: [adotLayer, ...(props.layers ?? [])],
     });
 
     grafanaConfig.grantRead(this.fn);

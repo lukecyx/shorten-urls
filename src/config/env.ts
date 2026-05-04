@@ -1,10 +1,11 @@
 export const env = {
-  feistelSecret: optional("FEISTEL_SECRET"),
-  feistelRounds: optional("FEISTEL_ROUNDS"),
-  domainBits: optional("DOMAIN_BITS"),
-  codeBase: required("CODE_BASE"),
-  codeLength: required("CODE_LENGTH"),
-  databaseUrl: optional("DATABASE_URL"),
+  get feistelSecret() { return optional("FEISTEL_SECRET"); },
+  get feistelRounds() { return optional("FEISTEL_ROUNDS"); },
+  get domainBits() { return optional("DOMAIN_BITS"); },
+  get codeBase() { return required("CODE_BASE"); },
+  get codeLength() { return required("CODE_LENGTH"); },
+  get databaseUrl() { return optional("DATABASE_URL"); },
+  get analyticsQueueUrl() { return required("ANALYTICS_QUEUE_URL"); },
 };
 
 function required(name: string): string {

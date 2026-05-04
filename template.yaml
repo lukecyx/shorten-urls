@@ -102,6 +102,9 @@ Resources:
       Handler: src/urls/handlers/redirect.handler
       Description: Redirects from short code to original URL
       Timeout: 10
+      Environment:
+        Variables:
+          ANALYTICS_QUEUE_URL: !Ref ANALYTICS_QUEUE_URL
       Layers:
         - !Ref SnowflakeLayer
         - !Ref EncodingLayer
@@ -126,6 +129,32 @@ Resources:
           - "aws-sdk"
           - "snowflake"
           - "encoding"
+          - "@prisma/client"
+        Loader:
+          - .ts=ts
+
+  AnalyticsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AnalyticsFunction
+      CodeUri: .
+      Handler: src/urls/handlers/analytics.handler
+      Description: Processes URL analytics messages from SQS
+      Timeout: 30
+      Environment:
+        Variables:
+          DATABASE_URL: !Ref DATABASE_URL
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/urls/handlers/analytics.ts
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        External:
+          - "@aws-sdk/*"
+          - "aws-sdk"
           - "@prisma/client"
         Loader:
           - .ts=ts

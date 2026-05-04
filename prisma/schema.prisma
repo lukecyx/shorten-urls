@@ -14,12 +14,28 @@ datasource db {
 }
 
 model Url {
-  id        String   @id @db.Uuid
-  shortCode String   @unique @map("short_code")
-  longUrl   String   @map("long_url")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id        String         @id @db.Uuid
+  shortCode String         @unique @map("short_code")
+  longUrl   String         @map("long_url")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  analytics UrlAnalytics[]
 
   @@index([shortCode])
   @@map("urls")
+}
+
+model UrlAnalytics {
+  id        String   @id @db.Uuid
+  urlId     String   @map("url_id") @db.Uuid
+  url       Url      @relation(fields: [urlId], references: [id])
+  timestamp DateTime @default(now())
+  ip        String?
+  userAgent String?  @map("user_agent")
+  referrer  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([urlId])
+  @@map("url_analytics")
 }

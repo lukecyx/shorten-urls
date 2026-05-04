@@ -32,7 +32,11 @@ export async function redirect(
   }
 
   try {
-    const urlRecord = await redirectService(urlCode, context);
+    const urlRecord = await redirectService(urlCode, context, {
+      ip: event.requestContext?.http?.sourceIp,
+      userAgent: event.requestContext?.http?.userAgent,
+      referrer: event.headers["referer"],
+    });
 
     return {
       statusCode: 302,
@@ -42,7 +46,10 @@ export async function redirect(
     return {
       statusCode: 500,
       headers: { contentType: "application/json" },
-      body: JSON.stringify({ message: "Internal server error", error }),
+      body: JSON.stringify({
+        message: "Internal server error",
+        error: (error as Error).message,
+      }),
     };
   }
 }

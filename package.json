@@ -20,7 +20,8 @@
     "sam:start": "sam local start-api --env-vars env.json --skip-pull-image",
     "dev:setup": "npm run build:layers && npm run docker:up && npm run sam:build",
     "dev": "npm run dev:setup && concurrently --names 'SAM,WATCH' --prefix-colors 'cyan,magenta' 'npm run sam:start' 'npm run sam:build:watch'",
-    "dev:clean": "npm run docker:down && rm -rf infra/lambda-layers/snowflake/dist infra/lambda-layers/encoding/dist .aws-sam"
+    "dev:clean": "npm run docker:down && rm -rf infra/lambda-layers/snowflake/dist infra/lambda-layers/encoding/dist .aws-sam",
+    "analytics:invoke": "sam local invoke AnalyticsFunction --env-vars env.json --event events/analytics.json --skip-pull-image"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,7 @@
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.1000.0",
+    "@aws-sdk/client-sqs": "^3.1041.0",
     "@grpc/grpc-js": "^1.14.3",
     "@middy/core": "^6.4.5",
     "@middy/http-error-handler": "^6.4.5",
