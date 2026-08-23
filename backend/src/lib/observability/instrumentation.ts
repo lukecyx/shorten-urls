@@ -11,6 +11,9 @@ import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 let sdk: NodeSDK | null = null;
 
 export function initSDK() {
+  // NOTE: AWS_LAMBDA_EXEC_WRAPPER is only set when deployed (BaseLambdaConstruct);
+  // there the ADOT layer already handles instrumentation, so this manual SDK is
+  // local-dev only, exporting to OTLP_ENDPOINT (the docker otel-lgtm collector).
   if (sdk || process.env.AWS_LAMBDA_EXEC_WRAPPER) {
     return;
   }

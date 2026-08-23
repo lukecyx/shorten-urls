@@ -105,6 +105,7 @@ Resources:
       Environment:
         Variables:
           ANALYTICS_QUEUE_URL: !Ref ANALYTICS_QUEUE_URL
+          SQS_ENDPOINT: !Ref SQS_ENDPOINT
       Layers:
         - !Ref SnowflakeLayer
         - !Ref EncodingLayer

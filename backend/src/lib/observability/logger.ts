@@ -1,9 +1,6 @@
 import { logs, Logger } from "@opentelemetry/api-logs";
 import { Context as OtelContext } from "@opentelemetry/api";
-import {
-  LoggerProvider,
-  SimpleLogRecordProcessor,
-} from "@opentelemetry/sdk-logs";
+import { LoggerProvider, SimpleLogRecordProcessor } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-grpc";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
@@ -11,6 +8,9 @@ import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 let loggingInitialized = false;
 
 export function initLogging() {
+  // NOTE: inverse of instrumentation.ts's guard. ADOT's auto-instrumentation
+  // doesn't cover logs, so this only runs when deployed (AWS_LAMBDA_EXEC_WRAPPER
+  // set), exporting to the ADOT layer's local collector which relays to Grafana Cloud.
   if (loggingInitialized || !process.env.AWS_LAMBDA_EXEC_WRAPPER) {
     return;
   }

@@ -15,7 +15,7 @@ build/
 .env.stage
 .env.prod
 
-/src/generated/prisma
+/backend/src/generated/prisma
 
 # SAM local development
 env.json

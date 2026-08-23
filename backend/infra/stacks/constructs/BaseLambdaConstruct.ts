@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as cdk from "aws-cdk-lib";
-import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as ssm from "aws-cdk-lib/aws-ssm";
 import { ISecurityGroup, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 
 export interface BaseLambdaProps {
@@ -28,12 +28,6 @@ export class BaseLambdaConstruct extends Construct {
       "arn:aws:lambda:eu-west-2:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-0:1",
     );
 
-    const grafanaConfig = secretsmanager.Secret.fromSecretNameV2(
-      this,
-      "GrafanaConfigSecret",
-      "GrafanaConfig",
-    );
-
     this.fn = new NodejsFunction(this, "Lambda", {
       entry: props.entry,
       handler: props.handler ?? "handler",
@@ -50,14 +44,23 @@ export class BaseLambdaConstruct extends Construct {
       layers: [adotLayer, ...(props.layers ?? [])],
     });
 
-    grafanaConfig.grantRead(this.fn);
+    // Each param holds a single plain string value (not JSON):
+    //   /grafana/otel-endpoint -> e.g. "https://otlp-gateway-<region>.grafana.net/otlp"
+    //   /grafana/otel-header   -> e.g. "Authorization=Basic <base64(instanceID:token)>"
+    // SecureString dynamic references need an explicit version — bump these
+    // when the parameter values are rotated.
+    const otelEndpoint = ssm.StringParameter.fromSecureStringParameterAttributes(
+      this,
+      "OtelEndpointParam",
+      { parameterName: "/grafana/otel-endpoint", version: 1 },
+    ).stringValue;
+    this.fn.addEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", otelEndpoint);
 
-    const otelEndpoint = grafanaConfig.secretValueFromJson("otelEndpoint");
-    this.fn.addEnvironment(
-      "OTEL_EXPORTER_OTLP_ENDPOINT",
-      otelEndpoint.toString(),
-    );
-    const otelHeader = grafanaConfig.secretValueFromJson("otelHeader");
-    this.fn.addEnvironment("OTEL_EXPORTER_OTLP_HEADERS", otelHeader.toString());
+    const otelHeader = ssm.StringParameter.fromSecureStringParameterAttributes(
+      this,
+      "OtelHeaderParam",
+      { parameterName: "/grafana/otel-header", version: 1 },
+    ).stringValue;
+    this.fn.addEnvironment("OTEL_EXPORTER_OTLP_HEADERS", otelHeader);
   }
 }

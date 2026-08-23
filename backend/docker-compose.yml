@@ -35,6 +35,16 @@ services:
     networks:
       - shorten-urls-network
 
+  elasticmq:
+    image: softwaremill/elasticmq-native:latest
+    container_name: shorten-urls-elasticmq
+    ports:
+      - "9324:9324"
+    volumes:
+      - ./infra/elasticmq/elasticmq.conf:/opt/elasticmq.conf
+    networks:
+      - shorten-urls-network
+
   lgtm:
     image: grafana/otel-lgtm:latest
     container_name: shorten-urls-lgtm
